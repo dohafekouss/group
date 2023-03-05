@@ -1,1 +1,343 @@
+#include <iostream>
+#include <ctime>
+using namespace std;
+
+struct Node{
+    struct Node *next;
+    int xpos, ypos;
+
+    Node(int x, int y){
+        this->xpos = x;
+        this->ypos = y;
+        next = NULL;
+    }
+
+    void printNode(){
+        cout << xpos << "," << ypos << " -> ";
+    }
+
+};
+
+struct linkedList{
+    struct Node *head;
+    int size;
+
+    linkedList(){
+        head = NULL;
+        int size = 0;
+    }
+    void pushBack(int x, int y){
+        Node *temp = new Node(x,y);
+        if (head == NULL){
+            head = temp;
+        }
+        else {
+            Node *p;
+            for(p=head ; p->next!=NULL ;p=p->next);
+            p->next = temp;
+        }
+    }
+    Node getHead(){
+        return *head;
+    }
+
+    void printList(){
+        Node *temp = head;
+        while(temp->next != NULL){
+            temp->printNode();
+            temp = temp->next;
+        }
+        cout << temp->xpos << "," <<temp->ypos << endl;
+    }
+};
+Node *temp;
+
+
+struct Player {
+    Node *pos = NULL;
+    linkedList *path;
+
+    Player() {
+        path = new linkedList();
+    }
+
+    void move(int roll) {
+        while (pos->next != NULL && roll > 0) {
+            pos = pos->next;
+            roll--;
+        }
+    }
+    void generatePath(int positions[][2], int size) {
+        for (int i = 0; i < size; i++) {
+            path->pushBack(positions[i][0], positions[i][1]);
+            pos = path->head;
+        }
+    }
+
+    int getX() { return pos->xpos; }
+
+    int getY() { return pos->ypos; }
+
+    bool testMove(Player *o) {
+        if (o->getX() == this->getX() && o->getY() == this->getY()) {
+            return true;
+        } else return false;
+    }
+
+    bool safeSpace(int spaces[12][2]) {
+        for (int i = 0; i < 12; i++) {
+            if (this->getX() == spaces[i][0] && this->getY() == spaces[i][1]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+};
+Player *p1 = new Player();
+Player *p2 = new Player();
+Player *p3 = new Player();
+Player *p4 = new Player();
+Player *players[4] = {p1,p2,p3,p4};
+
+void boardDisplay(Player* players[4]){
+    char p;
+    for (int i = 0; i < 7; i++) {
+        cout<<"\n";
+        for (int j = 0; j < 7; j++) {
+            string x = "";
+            bool playerPos = false;
+            for (int k = 0; k <= 3; k++) {
+                if (players[k]->getX() != j || players[k]->getY() != i) {
+                    continue;
+                }
+                playerPos = true;
+                p = '1' + k;
+                x += p;
+            }
+            if (!playerPos) {
+                if ((i==0&&j==0)||(i==0&&j==3)||(i==0&&j==6)||(i==1&&j==1)||(i==1&&j==5)||
+                        (i==3&&j==0)||(i==3&&j==6)||(i==5&&j==1)||(i==5&&j==5)||(i==6&&j==0)||
+                        (i==6&&j==3)||(i==6&&j==6)) {
+                    x = 'S';
+                }
+                else x = '*';
+            }
+            cout << "  " << x << "  ";
+        }
+    }
+    cout << "\n";
+}
+
+int main() {
+    srand(time(NULL));
+
+    int positions1[48][2] = {{6, 3},{6, 2},{6, 1},{6, 0},{5, 0},{4, 0},{3, 0},
+                             {2, 0},{1, 0},{0, 0},{0, 1},{0, 2},{0, 3},{0, 4},
+                             {0, 5},{0, 6},{1, 6},{2, 6},{3, 6},{4, 6},{5, 6},
+                             {6, 6},{6, 5},{5, 5},{4, 5},{3, 5},{2, 5},{1, 5},
+                             {1, 4},{1, 3},{1, 2},{1, 1},{2, 1},{3, 1},{4, 1},
+                             {5, 1},{5, 2},{5, 3},{5, 4},{4, 4},{3, 4},{2, 4},
+                             {2, 3},{2, 2},{3, 2},{4, 2},{4, 3},{3, 3}
+    };
+
+    int positions2[48][2] = {{3, 0},{2, 0},{1, 0},{0, 0},{0, 1},{0, 2},{0, 3},
+                             {0, 4},{0, 5},{0, 6},{1, 6},{2, 6},{3, 6},{4, 6},
+                             {5, 6},{6, 6},{6, 5},{6, 4},{6, 3},{6, 2},{6, 1},
+                             {6, 0},{5, 0},{5, 1},{5, 2},{5, 3},{5, 4},{5, 5},
+                             {4, 5},{3, 5},{2, 5},{1, 5},{1, 4},{1, 3},{1, 2},
+                             {1, 1},{2, 1},{3, 1},{4, 1},{4, 2},{4, 3},{4, 4},
+                             {3, 4},{2, 4},{2, 3},{2, 2},{3, 2},{3, 3}
+    };
+    int positions3[48][2] = {{0, 3},{0, 4},{0, 5},{0, 6},{1, 6},{2, 6},{3, 6},
+                             {4, 6},{5, 6},{6, 6},{6, 5},{6, 4},{6, 3},{6, 2},
+                             {6, 1},{6, 0},{5, 0},{4, 0},{3, 0},{2, 0},{1, 0},
+                             {0, 0},{0, 1},{1, 1},{2, 1},{3, 1},{4, 1},{5, 1},
+                             {5, 2},{5, 3},{5, 4},{5, 5},{4, 5},{3, 5},{2, 5},
+                             {1, 5},{1, 4},{1, 3},{1, 2},{2, 2},{3, 2},{4, 2},
+                             {4, 3},{4, 4},{3, 4},{2, 4},{2, 3},{3, 3}
+    };
+
+    int positions4[48][2] = {{3, 6},{4, 6},{5, 6},{6, 6},{6, 5},{6, 4},{6, 3},
+                             {6, 2},{6, 1},{6, 0},{5, 0},{4, 0},{3, 0},{2, 0},
+                             {1, 0},{0, 0},{0, 1},{0, 2},{0, 3},{0, 4},{0, 5},
+                             {0, 6},{1, 6},{1, 5},{1, 4},{1, 3},{1, 2},{1, 1},
+                             {2, 1},{3, 1},{4, 1},{5, 1},{5, 2},{5, 3},{5, 4},
+                             {5, 5},{4, 5},{3, 5},{2, 5},{2, 4},{2, 3},{2, 2},
+                             {3, 2},{4, 2},{4, 3},{4, 4},{3, 4},{3, 3}
+    };
+
+    int safe[12][2] = {{0, 0},{0, 3},{0, 6},{1, 1},{1, 5},{3, 0},{3, 6},{5, 1},{5, 5},{6, 0},{6, 3},{6, 6}};
+    p1->generatePath(positions1, 48);
+    p2->generatePath(positions2, 48);
+    p3->generatePath(positions3, 48);
+    p4->generatePath(positions4, 48);
+
+    bool won = false;
+    bool won2 = false;
+    bool won3 = false;
+    bool won4 = false;
+    int dice;
+    int p1pos=0;
+    int p2pos=0;
+    int p3pos=0;
+    int p4pos=0;
+
+    while ((won != true) || (won2 != true) || (won3 != true) || (won4 != true)) {
+
+        if (won == true && won2 == true && won3 == true&&won4==false) {
+            won4=true;
+            cout << "END OF GAME!\n";
+            cout<<"PLAYER 4 LOSES!!";
+        }
+        if (won == true && won2 == true && won4 == true&&won3==false) {
+            won3=true;
+            cout << "END OF GAME!\n";
+            cout<<"PLAYER 3 LOSES!!";
+        }
+        if (won4 == true && won2 == true && won3 == true&&won==false) {
+            won=true;
+            cout << "END OF GAME!\n";
+            cout<<"PLAYER 1 LOSES!!";
+        }
+        if (won == true && won4 == true && won3 == true&&won2==false) {
+            won2=true;
+            cout << "END OF GAME!\n";
+            cout<<"PLAYER 2 LOSES!!";
+        }
+
+        if (won != true) {
+            string enter;
+            cout << "\n Press any key to continue.";
+            cin >> enter;
+            dice = (rand()) % 4 + 1;
+            cout << "Moving player 1 " << dice << " spaces" << endl;
+            p1->move(dice);
+            p1pos+=dice;
+            if (p1pos>47){
+                p1pos=47;
+            }
+
+            cout << "Player 1 Position: "<<p1pos;
+            boardDisplay(players);
+            if (p1->pos->next == NULL) {
+                won = true;
+                cout << "Player 1 has won!" << endl;
+            } else if (!p1->safeSpace(safe)) {
+                if (p1->testMove(p2)) {
+                    p2->pos = p2->path->head;
+                    cout << "Player 1 knocked player 2 back to start" << endl;
+                    p2pos=0;
+                } else if (p1->testMove(p3)) {
+                    p3->pos = p3->path->head;
+                    cout << "Player 1 knocked player 3 back to start" << endl;
+                    p3pos=0;
+                } else if (p1->testMove(p4)) {
+                    p4->pos = p4->path->head;
+                    cout << "Player 1 knocked player 4 back to start" << endl;
+                    p4pos=0;
+                }
+            }
+        }
+        if (won2 != true) {
+            string enter;
+
+            cout << "\n Press any key to continue.";
+            cin >> enter;
+            dice = (rand()) % 4 + 1;
+            cout << "Moving player 2 " << dice << " spaces" << endl;
+            p2->move(dice);
+            p2pos+=dice;
+            if (p2pos>47){
+                p2pos=47;
+            }
+            cout << "Player 2 Position: "<<p2pos;
+            boardDisplay(players);
+            if (p2->pos->next == NULL) {
+                won2 = true;
+                cout << "Player 2 has won!" << endl;
+            } else if (!p2->safeSpace(safe)) {
+                if (p2->testMove(p1)) {
+                    p1->pos = p1->path->head;
+                    cout << "Player 2 knocked player 1 back to start" << endl;
+                    p1pos=0;
+                } else if (p2->testMove(p3)) {
+                    p3->pos = p3->path->head;
+                    cout << "Player 2 knocked player 3 back to start" << endl;
+                    p3pos=0;
+                } else if (p2->testMove(p4)) {
+                    p4->pos = p4->path->head;
+                    cout << "Player 2 knocked player 4 back to start" << endl;
+                    p4pos=0;
+                }
+            }
+        }
+        if (won3 != true) {
+            string enter;
+
+            cout << "\n Press any key to continue.";
+            cin >> enter;
+            dice = (rand()) % 4 + 1;
+            cout << "Moving player 3 " << dice << " spaces" << endl;
+            p3->move(dice);
+            p3pos+=dice;
+            if (p3pos>47){
+                p3pos=47;
+            }
+            cout << "Player 3 Position: "<<p3pos;
+            boardDisplay(players);
+            if (p3->pos->next == NULL) {
+                won3 = true;
+                cout << "Player 3 has won!" << endl;
+            } else if (!p3->safeSpace(safe)) {
+                if (p3->testMove(p1)) {
+                    p1->pos = p1->path->head;
+                    cout << "Player 3 knocked player 1 back to start" << endl;
+                    p1pos=0;
+                } else if (p3->testMove(p2)) {
+                    p2->pos = p2->path->head;
+                    cout << "Player 3 knocked player 2 back to start" << endl;
+                    p2pos=0;
+                } else if (p3->testMove(p4)) {
+                    p4->pos = p4->path->head;
+                    cout << "Player 3 knocked player 4 back to start" << endl;
+                    p4pos=0;
+                }
+            }
+        }
+        if (won4 != true) {
+            string enter;
+            cout << "\n Press any key to continue.";
+            cin >> enter;
+            dice = (rand()) % 4 + 1;
+            cout << "Moving player 4 " << dice << " spaces" << endl;
+            p4->move(dice);
+            p4pos+=dice;
+            if (p4pos>47){
+                p4pos=47;
+            }
+            cout << "Player 4 Position: "<<p4pos;
+            boardDisplay(players);
+            if (p4->pos->next == NULL) {
+                won4 = true;
+                cout << "Player 4 has won!" << endl;
+            } else if (!p4->safeSpace(safe)) {
+                if (p4->testMove(p1)) {
+                    p1->pos = p1->path->head;
+                    cout << "Player 4 knocked player 1 back to start" << endl;
+                    p1pos=0;
+                } else if (p4->testMove(p2)) {
+                    p2->pos = p2->path->head;
+                    cout << "Player 4 knocked player 2 back to start" << endl;
+                    p2pos=0;
+                } else if (p4->testMove(p3)) {
+                    p3->pos = p3->path->head;
+                    cout << "Player 4 knocked player 3 back to start" << endl;
+                    p3pos=0;
+                }
+            }
+        }
+
+    }
+}
 
