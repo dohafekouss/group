@@ -1,281 +1,326 @@
 #include <iostream>
-#include <ctime>
-
+#include<string>
+#include<curses.h>
+#include<stdlib.h>
+#include<vector>
+#include "student.h"
+#include <iomanip>
 using namespace std;
+#define limit 2
+int cnt;
 
-struct Node{
-    struct Node *next;
-    int xpos, ypos;
+vector <Student> studentList;
+vector <Student> academicExcellence;
+vector <Student> bestEffort;
+vector <Student> mostImproved;
+vector <Student> perfectAttendance;
+vector <Student> friendship;
+void add(int id,string firstname,string surname,string dob,string attendance){
+    cnt++;
+    studentList.push_back(Student(id,firstname,surname,dob,attendance));
+}
 
-    Node(int x, int y){
-        this->xpos = x;
-        this->ypos = y;
-        next = NULL;
+void add_student() {
+    string firstname, surname, dob, attendance;
+    int id;
+    id = cnt;
+    cout<<"Enter student's first name: ";
+    cin>>firstname;
+    cout<<"Enter student's surname: ";
+    cin>>surname;
+    cout<<"Enter student's date of birth: ";
+    cin>>dob;
+    cout<<"Enter student's attendance percentage: ";
+    cin>>attendance;
+    studentList.push_back(Student(id,firstname,surname,dob,attendance));
+}
+
+void displayAll(){
+    cout << "\nStudents:" << endl;
+    for (const Student& student : studentList) {
+        cout <<"Student Id: "<<student.getId() << "\t\tFirst Name: "<<student.getFirstName()<<
+        "\t\tSurname: "<<student.getSurname()<<"\t\tDate Of Birth: "<<student.getDOB()
+        <<"\t\tAttendance: "<<student.getAttendance()<<endl;
     }
-
-    void printNode(){
-        cout << xpos << "," << ypos << " -> ";
-    }
-
-};
-
-struct linkedList{
-
-    struct Node *head;
-    int size;
-
-    linkedList(){
-        head = NULL;
-        int size = 0;
-    }
-    void pushBack(int x, int y){
-        Node *temp = new Node(x,y);
-        if (head == NULL){
-            head = temp;
-        }
-        else {
-            Node *p;
-            for(p=head ; p->next!=NULL ;p=p->next);
-            p->next = temp;
-        }
-    }
-    Node getHead(){
-        return *head;
-    }
-
-    void printList(){
-        Node *temp = head;
-        while(temp->next != NULL){
-            temp->printNode();
-            temp = temp->next;
-        }
-        cout << temp->xpos << "," <<temp->ypos << endl;
-    }
-};
-
-struct Player{
-    Node *pos = NULL;
-    linkedList *path;
-
-    Player(){
-        path = new linkedList();
-    }
-
-    void move(int roll){
-        while(pos->next != NULL && roll > 0){
-            pos = pos->next;
-            roll--;
+}
+void getStudentById(){
+    int id;
+    cout<<"\nEnter Student Id: ";
+    cin>>id;
+    for (Student& student : studentList) {
+        if (student.getId() == id) {
+            cout << "Student Id: " << student.getId() << "\t\tFirst Name: " << student.getFirstName() <<
+                 "\t\tSurname: " << student.getSurname() << "\t\tDate Of Birth: " << student.getDOB()
+                 << "\t\tAttendance: " << student.getAttendance() << endl;
         }
     }
-
-    void display(){
-        cout << "Current position: " << pos->xpos << "," << pos->ypos << endl;
-    }
-    void boardDisplay(Player* player){
-
-        char board[48] ={};
-        
-
-    }
-
-    void generatePath(int positions[][2], int size){
-        for(int i = 0; i < size; i++){
-            path->pushBack(positions[i][0],positions[i][1]);
-            pos= path->head;
+}
+void deleteById(){
+    int id;
+    cout<<"\nEnter Student Id: ";
+    cin>>id;
+    for (int i=0;i<studentList.size();i++){
+        if (studentList[i].getId()==id){
+            studentList.erase(studentList.begin()+i);
         }
     }
+}
+void editDetails() {
+    int id;
+    cout<<"Enter Student Id: ";
+    cin>>id;
+    for (Student& student : studentList){
+        if (student.getId()==id){
+            int ch;
+            string ch2;
+            cout<<"\n1. First Name\n2. Surname\n3. Date of birth\n4. Attendance\n";
+            cout<<"Select a choice: \n";
+            cin>>ch;
+            cout<<"What do you want to change it to?\n";
+            cin>>ch2;
+            switch(ch) {
+                case 1:
+                    student.setFirstName(ch2);
+                    cout << "Change Made!" << endl;
+                    break;
+                case 2:
+                    student.setSurname(ch2);
+                    cout << "Change Made!<<" << endl;
+                    break;
+                case 3:
+                    student.setDOB(ch2);
+                    cout << "Change Made!" << endl;
+                    break;
+                case 4:
+                    student.setAttendance(ch2);
+                    cout<<"Change Made!"<<endl;
+                    break;
+            }
+        }
+    }
+    return;
+}
 
-    int getX(){return pos->xpos;}
-    int getY(){return pos->ypos;}
+bool login() {
+    string username, password;
+    string choice;
 
-    bool testMove(Player *o){
-        if(o->getX() == this->getX() && o->getY() == this->getY()){
+    cout << "Are you an admin(yes/no) : ";
+    cin >> choice;
+
+    if (choice == "yes") {
+        cout << "\n\t\tEnter login credentials for ADMIN PORTAL" << endl;
+        cout << "\nEnter username : ";
+        cin >> username;
+        cout << "Enter password : ";
+        cin >> password;
+
+        if (username == "admin" && password == "admin") {
+            cout << "\nWELCOME TO ADMIN PORTAL" << endl;
             return true;
+        } else {
+            cout<<"\nUsername or Password Incorrect!";
+            return false;
         }
-        else return false;
+    } else{
+        cout<<"\n Sorry, you do not have access to this system.";
+        return 0;
     }
+}
 
-    bool safeSpace(int spaces[12][2]){
-        for(int i = 0; i < 12; i++){
-            if(this->getX() == spaces[i][0] && this->getY() == spaces[i][1]){
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-};
-
-
-int main(){
-    srand(time(NULL));
-
-    Player *p1 = new Player();
-    Player *p2 = new Player();
-    Player *p3 = new Player();
-    Player *p4 = new Player();
-    int positions1[48][2] = {{6,3},{6,2},{6,1},{6,0},{5,0},{4,0},{3,0},
-                             {2,0},{1,0},{0,0},{0,1},{0,2},{0,3},{0,4},
-                             {0,5},{0,6},{1,6},{2,6},{3,6},{4,6},{5,6},
-                             {6,6},{6,5},{5,5},{4,5},{3,5},{2,5},{1,5},
-                             {1,4},{1,3},{1,2},{1,1},{2,1},{3,1},{4,1},
-                             {5,1},{5,2},{5,3},{5,4},{4,4},{3,4},{2,4},
-                             {2,3},{2,2},{3,2},{4,2},{4,3},{3,3}
-    };
-
-    int positions2[48][2] = {{3,0},{2,0},{1,0},{0,0},{0,1},{0,2},{0,3},
-                             {0,4},{0,5},{0,6},{1,6},{2,6},{3,6},{4,6},
-                             {5,6},{6,6},{6,5},{6,4},{6,3},{6,2},{6,1},
-                             {6,0},{5,0},{5,1},{5,2},{5,3},{5,4},{5,5},
-                             {4,5},{3,5},{2,5},{1,5},{1,4},{1,3},{1,2},
-                             {1,1},{2,1},{3,1},{4,1},{4,2},{4,3},{4,4},
-                             {3,4},{2,4},{2,3},{2,2},{3,2},{3,3}
-    };
-    int positions3[48][2]={
-            {0,3},  {0,4},  {0,5}, {0,6},  {1,6},  {2,6},  {3,6},
-            {4,6},  {5,6},  {6,6},  {6,5},  {6,4},  {6,3}, {6,2},
-            {6,1},  {6,0},  {5,0},  {4,0},  {3,0},  {2,0},  {1,0},
-            {0,0},  {0,1},  {1,1},  {2,1},  {3,1},  {4,1},  {5,1},
-            {5,2}, {5,3},  {5,4}, {5,5},  {4,5},  {3,5},  {2,5},
-            {1,5}, {1,4}, {1,3}, {1,2},  {2,2},  {3,2},  {4,2},
-            {4,3}, {4,4},  {3,4},  {2,4},  {2,3},  {3,3}
-    };
-
-    int positions4[48][2]={
-            {3,6},  {4,6},  {5,6}, {6,6},  {6,5},  {6,4},  {6,3},
-            {6,2},  {6,1},  {6,0},  {5,0},  {4,0},  {3,0}, {2,0},
-            {1,0},  {0,0},  {0,1},  {0,2},  {0,3},  {0,4},  {0,5},
-            {0,6},  {1,6},  {1,5},  {1,4},  {1,3},  {1,2},  {1,1},
-            {2,1}, {3,1},  {4,1}, {5,1},  {5,2},  {5,3},  {5,4},
-            {5,5}, {4,5}, {3,5}, {2,5},  {2,4},  {2,3},  {2,2},
-            {3,2}, {4,2},  {4,3},  {4,4},  {3,4},  {3,3}
-    };
-
-    int safe[12][2] = {{0,0},{0,3},{0,6},{1,1},{1,5},{3,0},{3,6},{5,1},{5,5},{6,0},{6,3},{6,6}};
-    p1->generatePath(positions1, 48);
-    p2->generatePath(positions2, 48);
-    p3->generatePath(positions3, 48);
-    p4->generatePath(positions4, 48);
-    /*
-    p1->path->printList();
-    p2->path->printList();
-    p4->path->printList();
-    p1->display();
-    p1->move(3);
-    p1->display();
-    */
-    bool won = false;
-    bool won2=false;
-    bool won3=false;
-    bool won4=false;
-    int dice;
-    while ((won != true)||(won2!=true)||(won3!=true)||(won4!=true)) {
-        if (won!=true){
-            string enter;
-            cout << "\n Press any key to continue.";
-            cin >> enter;
-            dice = (rand()) % 4 + 1;
-            cout << "Moving player 1 " << dice << " spaces" << endl;
-            p1->move(dice);
-            cout << "Player 1 ";
-            p1->display();
-            if (p1->pos->next == NULL) {
-                won = true;
-                cout << "Player 1 has won!" << endl;
-            } else if (!p1->safeSpace(safe)) {
-                if (p1->testMove(p2)) {
-                    p2->pos = p2->path->head;
-                    cout << "Player 1 knocked player 2 back to start" << endl;
-                } else if (p1->testMove(p3)) {
-                    p3->pos = p3->path->head;
-                    cout << "Player 1 knocked player 3 back to start" << endl;
-                } else if (p1->testMove(p4)) {
-                    p4->pos = p4->path->head;
-                    cout << "Player 1 knocked player 4 back to start" << endl;
+void print(vector <Student> list) {
+    int v,ch3,vote,votes,id,highestVotes;
+    string firstName, surname;
+    bool x=false,flag=false;
+    do {
+        cout << "\n---------------------------------------";
+        cout << "\n       STUDENT VOTING SYSTEM           ";
+        cout << "\n---------------------------------------";
+        cout << "\n       1. Vote With Student ID         ";
+        cout << "\n       2. View Current Nominees        ";
+        cout << "\n       3. Nominate Student             ";
+        cout << "\n       4. View Winner                  ";
+        cout << "\n       5. Back To Awards List          ";
+        cout << "\n---------------------------------------\n";
+        cout<<"Enter Your Choice: ";
+        cin >> ch3;
+        switch (ch3) {
+            case 1:
+                cout << "\nEnter your votes student id: ";
+                cin >> vote;
+                for (Student &student: list) {
+                    if (student.getId() == vote) {
+                        x=true;
+                        int a = student.getVotes();
+                        student.setVotes(a + 1);
+                        cout<<"Your vote has been tallied!\n";
+                    }
                 }
-            }
-        }
-        if (won2!=true){
-            string enter;
-
-            cout << "\n Press any key to continue.";
-            cin >> enter;
-            dice = (rand()) % 4 + 1;
-            cout << "Moving player 2 " << dice << " spaces" << endl;
-            p2->move(dice);
-            cout << "Player 2 ";
-            p2->display();
-            if (p2->pos->next == NULL) {
-                won2 = true;
-                cout << "Player 2 has won!" << endl;
-            } else if (!p2->safeSpace(safe)) {
-                if (p2->testMove(p1)) {
-                    p1->pos = p1->path->head;
-                    cout << "Player 2 knocked player 1 back to start" << endl;
-                } else if (p2->testMove(p3)) {
-                    p3->pos = p3->path->head;
-                    cout << "Player 2 knocked player 3 back to start" << endl;
-                } else if (p2->testMove(p4)) {
-                    p4->pos = p4->path->head;
-                    cout << "Player 2 knocked player 4 back to start" << endl;
+                if (x==false){
+                    cout<<"\nInvalid Student Id! Student hasn't been nominated!";
                 }
-            }
-        }
-        if (won3!=true){
-            string enter;
-
-            cout << "\n Press any key to continue.";
-            cin >> enter;
-            dice = (rand()) % 4 + 1;
-            cout << "Moving player 3 " << dice << " spaces" << endl;
-            p3->move(dice);
-            cout << "Player 3 ";
-            p3->display();
-            if (p3->pos->next == NULL) {
-                won3 = true;
-                cout << "Player 3 has won!" << endl;
-            } else if (!p3->safeSpace(safe)) {
-                if (p3->testMove(p1)) {
-                    p1->pos = p1->path->head;
-                    cout << "Player 3 knocked player 1 back to start" << endl;
-                } else if (p3->testMove(p2)) {
-                    p2->pos = p2->path->head;
-                    cout << "Player 3 knocked player 2 back to start" << endl;
-                } else if (p3->testMove(p4)) {
-                    p4->pos = p4->path->head;
-                    cout << "Player 3 knocked player 4 back to start" << endl;
+                break;
+            case 2:
+                for (const Student &student: list) {
+                    cout << "Student Id: " << student.getId() << "\t\tFirst Name: "
+                         << student.getFirstName() <<
+                         "\t\tSurname: " << student.getSurname() << "\t\tNumber of Votes: " <<
+                         student.getVotes() << endl;
                 }
-            }
-        }
-        if (won4!=true){
-            string enter;
-            cout<<"\n Press any key to continue.";
-            cin >>enter;
-            dice=(rand()) % 4 + 1;
-            cout << "Moving player 4 " << dice << " spaces"<< endl;
-            p4->move(dice);
-            cout << "Player 4 ";
-            p4->display();
-            if(p4->pos->next == NULL){
-                won4 = true;
-                cout << "Player 4 has won!" << endl;
-            } else if(!p4->safeSpace(safe)) {
-                if (p4->testMove(p1)) {
-                    p1->pos = p1->path->head;
-                    cout << "Player 4 knocked player 1 back to start" << endl;
-                } else if (p4->testMove(p2)) {
-                    p2->pos = p2->path->head;
-                    cout << "Player 4 knocked player 2 back to start" << endl;
-                } else if (p3->testMove(p3)) {
-                    p3->pos = p3->path->head;
-                    cout << "Player 4 knocked player 3 back to start" << endl;
-                }
-            }
-        }
+                break;
+            case 3:
+                cout << "Enter Student ID: ";
+                cin >> id;
 
-    }
-    if (won == true&&won2==true&&won3==true&&won4==true){
-        cout<<"END OF GAME";
+                for (const Student &student: studentList) {
+                    if (student.getId()==id){
+                        x=true;
+                        id=student.getId();
+                        firstName=student.getFirstName();
+                        surname=student.getSurname();
+                        v=1;
+                    }
+                }
+                if (x==true){
+                    for (const Student &student2: list) {
+                        if (student2.getId()==id){
+                            cout<<"Student Already Nominated!\n";
+                            flag=true;
+                        }
+                    }
+                }else if (x==false){
+                    cout<<"\nInvalid Id! Student doesn't exist!";
+
+                }
+                if(x==true&&flag==false){
+                    list.push_back(Student(id,firstName,surname,v));
+                    cout << "Student Nominated and your vote has been tallied!\n";
+                }
+                break;
+            case 4:
+                highestVotes=list[0].getVotes();
+                for (int i=0;i<list.size();i++) {
+                    if (list[i+1].getVotes()>list[i].getVotes()){
+                        highestVotes=list[i+1].getVotes();
+                        firstName = list[i+1].getFirstName();
+                        surname = list[i+1].getSurname();
+                    }
+                }
+                cout<<"The Winner is "<<firstName<<" "<<surname<<" with "
+                    <<highestVotes<<" vote(s)!"<<endl;
+                break;
+            case 5:
+                break;
+            default:
+                cout<<"Invalid Choice!";
+                break;
+        }
+    }while(ch3!=5);
+}
+
+int main() {
+    add(cnt, "Daniel","Brown","29/03/2005","99%");
+    add(cnt, "Hannah","Smith","15/08/2005","97%");
+    add(cnt, "Sarah","Taber","14/02/2005","98%");
+    add(cnt, "Ryan","Skalli","20/02/2005","100%");
+    add(cnt, "Melissa","Rodriguez","13/06/2005","99%");
+    add(cnt, "Adam", "Worth", "12/04/2005","95%");
+    add(cnt, "Benita", "Chapman", "11/01/2005","92%");
+    add(cnt, "Christina", "Jones", "21/11/2004","98%");
+    add(cnt, "David","Williams","11/12/2004","100%");
+
+    academicExcellence.push_back(Student(0,"Daniel","Brown",23));
+    academicExcellence.push_back(Student(1, "Hannah","Smith",32));
+    academicExcellence.push_back(Student(2, "Sarah","Taber",23));
+    bestEffort.push_back(Student(5, "Adam", "Worth",8));
+    bestEffort.push_back(Student(0, "Daniel","Brown",11));
+    mostImproved.push_back(Student(2, "Sarah","Taber",18));
+    mostImproved.push_back(Student(7, "Christina", "Jones",20));
+    mostImproved.push_back(Student(4, "Melissa","Rodriguez",31));
+    friendship.push_back(Student(7, "Christina", "Jones",3));
+    friendship.push_back(Student(5, "Adam", "Worth",16));
+    perfectAttendance.push_back(Student(3, "Ryan","Skalli",28));
+    perfectAttendance.push_back(Student(8, "David","Williams",23));
+
+    int ch, ch2;
+
+    if (login() == true) {
+        do {
+            cout << "\n---------------------------------------";
+            cout << "\n       STUDENT MANAGEMENT SYSTEM       ";
+            cout << "\n---------------------------------------";
+            cout << "\n       1. Add New Student              ";
+            cout << "\n       2. Edit Student Details         ";
+            cout << "\n       3. Delete Student               ";
+            cout << "\n       4. Vote For Student Awards      ";
+            cout << "\n       5. Search For Student           ";
+            cout << "\n       6. Return All Students          ";
+            cout << "\n       7. Exit                         ";
+            cout << "\n---------------------------------------\n";
+
+            cout << "Choose An Option: \n";
+            cin>>ch;
+
+            switch (ch) {
+                case 1:
+                    add_student();
+                    break;
+                case 2:
+                    editDetails();
+                    break;
+                case 3:
+                    deleteById();
+                    break;
+                case 4:
+                    do {
+                        cout << "\n----------------------------------------";
+                        cout << "\n       STUDENT VOTING SYSTEM            ";
+                        cout << "\n----------------------------------------";
+                        cout << "\n        1. Academic Excellence          ";
+                        cout << "\n        2. Best Effort                  ";
+                        cout << "\n        3. Most Improved                ";
+                        cout << "\n        4. Perfect Attendance           ";
+                        cout << "\n        5. Friendship                   ";
+                        cout << "\n        6. Back to Main Menu            ";
+                        cout << "\n----------------------------------------\n";
+
+                        cout << "Choose An Option: \n";
+                        cin >> ch2;
+                        switch (ch2) {
+                            case 1:
+                                print(academicExcellence);
+                                break;
+                            case 2:
+                                print(bestEffort);
+                                break;
+                            case 3:
+                                print(mostImproved);
+                                break;
+                            case 4:
+                                print(perfectAttendance);
+                                break;
+                            case 5:
+                                print(friendship);
+                                break;
+                            case 6:
+                                break;
+                            default:
+                                cout<<"\nInvalid Choice!";
+                        }
+                    }while(ch2!=6);
+                case 5:
+                    getStudentById();
+                    break;
+                case 6:
+                    displayAll();
+                    break;
+                case 7:
+                    break;
+                default:
+                    cout<<"\nInvalid Choice!";
+            }
+        } while (ch != 7);
+    } else{
+        return 0;
     }
 }
