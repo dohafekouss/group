@@ -20,14 +20,16 @@ class Main:
         f = Frame(self.master, height=800, width=800, bg="azure", relief="ridge", bd=20)
         f.propagate(0)
         f.pack()
+        self.title = Label(f, text="Python Quiz", fg="black", bg="azure", font=("Roman", 30, "bold")).place(x=300, y=300)
 
-        self.mainTitle = Label(f, text="Python Quiz", fg="black" ,bg="azure",font=("Roman", 30, "bold")).place(x=300, y=300)
         self.register = Button(f, text="Register", width=20, height=3, fg="royalblue4", bg="lavender", font=("Roman", 10, "bold"), command=self.userRegister)
+        self.register.place(x=400, y=400)
         self.login = Button(f, text="Login", width=20, height=3, fg="royalblue4", bg="lavender", font=("Roman", 10, "bold"), command=self.userLogin)
+        self.login.place(x=200, y=400)
         self.music = Button(f, text="Listen to music", width=20, height=3, fg="royalblue4", bg="lavender", font=("Roman", 10, "bold"), command=self.userMusic)
         self.music.place(x=300, y=470)
-        self.register.place(x=400, y=400)
-        self.login.place(x=200, y=400)
+
+
 
     def userRegister(self):
         self.registerNew = Toplevel(self.master)
@@ -181,7 +183,7 @@ class Register:
         self.tpw = Entry(f1, width=30, show="*")
 
         self.submit = Button(f1, text="Submit", width=20, height=5, fg="royalblue4", bg="lavender",font=("Helvetica", 10, "bold italic"), command=self.submitMethod)
-        self.cancel = Button(f1, text="Cancel", width=20, height=5, fg="royalblue4", bg="lavender",font=("Helvetica", 10, "bold italic"), command=self.c_cancel)
+        self.cancel = Button(f1, text="Cancel", width=20, height=5, fg="royalblue4", bg="lavender", font=("Helvetica", 10, "bold italic"), command=self.toCancel)
 
         self.checkB = Checkbutton(f1, text='Show Password', bg="azure", fg="royalblue4",font=("Helvetica", 10, "bold italic"), variable=self.var, onvalue=1,offvalue=0, command=self.showPassword)
 
@@ -247,15 +249,15 @@ class Register:
         uname = self.tuname.get()
         pw = self.tpw.get()
         p = hashlib.sha1((uname[:5] + pw).encode('utf-8')).hexdigest()
-        l1 = [name, lname, email, uname, pw]
-        c = self.check(l1)
+        list5 = [name, lname, email, uname, pw]
+        c = self.check(list5)
         if c == 1:
             str = "select * from reg where uname='%s'"
             arg = (uname)
             cursor.execute(str % arg)
             row = cursor.fetchone()
             if row is not None:
-                messagebox.showwarning("Error", "Username Already Taken, Try Again!")
+                messagebox.showwarning("Error", "Username already exists. Please try again!")
                 registerGlobalVariable.destroy()
             else:
                 try:
@@ -263,20 +265,19 @@ class Register:
                     arg = (name, lname, email, uname, p, 0)
                     cursor.execute(s % arg)
                     conn.commit()
-                    print("DEBUG: 1 ROW ADDED")
                     self.tname.delete(0, 'end')
                     self.tlname.delete(0, 'end')
                     self.temail.delete(0, 'end')
                     self.tuname.delete(0, 'end')
                     self.tpw.delete(0, 'end')
-                    messagebox.showinfo("Success", "Registration Successful!")
+                    messagebox.showinfo("Notice", "You have successfully registered your new account!")
                     registerGlobalVariable.destroy()
                 except:
                     conn.rollback()
         cursor.close()
         conn.close()
 
-    def c_cancel(self):
+    def toCancel(self):
         registerGlobalVariable.destroy()
 
 class userAccount:
@@ -309,13 +310,13 @@ class userAccount:
     def access(self):
         self.quizWindow = Toplevel(self.master)
         self.quizWindow.resizable(0, 0)
-        self.qw = Quiz(self.quizWindow, self.u)
+        self.qw = startQuiz(self.quizWindow, self.u)
 
     def logout(self):
         accountGlobalVariable.destroy()
 
 
-class Quiz:
+class startQuiz:
     def __init__(self, master, u):
         self.user = u
         global quizGlobalVariable
@@ -324,34 +325,32 @@ class Quiz:
         self.master.geometry("1350x750+0+0")
         self.master.title("Online Quiz")
         self.master.config(bg="azure")
-        global f1
         f = Frame(self.master, height=1080, width=1920, bg="azure", relief="ridge", bd=20)
         connection = MySQLdb.connect(host='localhost', database='tkinterprojDB', user='root', password='SaDa2903!')
         cursor = connection.cursor()
 
-        global l1, answerstemp
+        global l1, answers2
         global questions
         questions = []
         global options
         options = []
         global answers
         answers = []
-        answerstemp = []
-        s1 = set()
+        answers2 = []
+        set1 = set()
 
-        while len(s1) < 10:
-            strQ = ""
-            strA = ""
+        while len(set1) < 10:
+            stringQuestion = ""
             id = random.randint(1, 10)
-            s1.add(id)
+            set1.add(id)
 
-        while len(s1) > 0:
+        while len(set1) > 0:
             s = "select qstn from questions where QID=%d"
-            id = s1.pop()
+            id = set1.pop()
             arg = (id)
             cursor.execute(s % arg)
-            strQ = strQ.join(list(cursor.fetchone()))
-            questions.append(strQ)
+            stringQuestion = stringQuestion.join(list(cursor.fetchone()))
+            questions.append(stringQuestion)
 
             s = "select opA,opB,opC,opD from questions where QID=%d"
             arg = (id)
@@ -362,7 +361,7 @@ class Quiz:
             arg = (id)
             cursor.execute(s % arg)
             l = list(cursor.fetchone())
-            answerstemp.append(l)
+            answers2.append(l)
 
         cursor.close()
         connection.close()
@@ -372,21 +371,21 @@ class Quiz:
 
         f.propagate(0)
         f.pack()
-        self.qno = 0
+        self.questionNo = 0
         self.score1 = 0
-        self.ques = self.create_q(f, self.qno)
-        self.opts = self.create_options(f)
-        self.display_q(self.qno)
-        self.Back = Button(f, text="<- Back", width=15, height=3, fg="royalblue4", bg="snow2",font=("Helvetica", 10, "bold italic"), command=self.back).place(x=100, y=325)
-        self.Next = Button(f, text="Next ->", width=15, height=3, fg="royalblue4", bg="snow2",font=("Helvetica", 10, "bold italic"), command=self.next).place(x=250, y=325)
-        self.submit = Button(f, text="Submit", width=34, height=2, fg="ghost white", bg="DeepSkyBlue2",font=("Helvetica", 10, "bold italic"), command=self.Submit).place(x=100, y=400)
+        self.ques = self.cQuestions(f, self.questionNo)
+        self.options = self.cOptions(f)
+        self.disQuestions(self.questionNo)
+        self.Back = Button(f, text="Back", width=15, height=3, fg="royalblue4", bg="snow2", font=("Helvetica", 10, "bold italic"), command=self.goBack).place(x=100, y=325)
+        self.Next = Button(f, text="Next", width=15, height=3, fg="royalblue4", bg="snow2", font=("Helvetica", 10, "bold italic"), command=self.showNext).place(x=250, y=325)
+        self.submit = Button(f, text="Submit", width=34, height=2, fg="ghost white", bg="DeepSkyBlue2", font=("Helvetica", 10, "bold italic"), command=self.finished).place(x=100, y=400)
 
-    def create_q(self, master, qno):
-        qLabel = Label(master, text=questions[qno], bg='azure', font=("Times New Roman", 20))
-        qLabel.place(x=30, y=70)
-        return qLabel
+    def cQuestions(self, master, qno):
+        questionLabel = Label(master, text=questions[qno], bg='azure', font=("Times New Roman", 20))
+        questionLabel.place(x=30, y=70)
+        return questionLabel
 
-    def create_options(self, master):
+    def cOptions(self, master):
         b_val = 0
         b = []
         ht = 85
@@ -400,52 +399,51 @@ class Quiz:
             b_val = b_val + 1
         return b
 
-    def display_q(self, qno):
+    def disQuestions(self, qno):
         b_val = 0
         self.ques['text'] = str(qno + 1) + ". " + questions[qno]
         for op in options[qno]:
-            self.opts[b_val]['text'] = op
+            self.options[b_val]['text'] = op
             b_val = b_val + 1
 
-    def next(self):
-        self.qno += 1
+    def showNext(self):
+        self.questionNo += 1
 
-        if self.qno >= len(questions):
-            self.qno -= 1
+        if self.questionNo >= len(questions):
+            self.questionNo -= 1
             messagebox.showwarning("Warning", "Finished! Press Submit to proceed")
         else:
-            l1[self.qno - 1] = self.opt_selected.get()
-            self.opt_selected.set(l1[(self.qno)])
-            self.display_q(self.qno)
+            l1[self.questionNo - 1] = self.opt_selected.get()
+            self.opt_selected.set(l1[(self.questionNo)])
+            self.disQuestions(self.questionNo)
 
-    def back(self):
-        l1[self.qno] = self.opt_selected.get()
-        self.qno -= 1
-        if self.qno < 0:
-            self.qno += 1
+    def goBack(self):
+        l1[self.questionNo] = self.opt_selected.get()
+        self.questionNo -= 1
+        if self.questionNo < 0:
+            self.questionNo += 1
             messagebox.showerror("Error", "You are already in the start!!!")
         else:
-            self.display_q(self.qno)
-            c = l1[self.qno]
+            self.disQuestions(self.questionNo)
+            c = l1[self.questionNo]
             self.opt_selected.set(c)
 
-    def Submit(self):
-        l1[self.qno] = self.opt_selected.get()
+    def finished(self):
+        l1[self.questionNo] = self.opt_selected.get()
         x = 0
         y = True
         for i in range(10):
             if (l1[i] == 0):
                 x += 1
         if (x > 0 and x != 1):
-            y = messagebox.askyesno("Warning", "You have not attempted " + str(x) + " questions, Are you sure you want to submit?, You won't be able to make changes again")
+            y = messagebox.askyesno("Notice", "You have not attempted " + str(x) + " questions. Are you sure you want to submit?")
         elif (x == 1):
-            y = messagebox.askyesno("Warning", "You have not attempted " + str(x) + " question, Are you sure you want to submit?, You won't be able to make changes again")
+            y = messagebox.askyesno("Notice", "You have not attempted " + str(x) + " question. Are you sure you want to submit?")
         if (y == True or x == 0):
             s = 0
             for i in range(10):
-                if (l1[i] == answerstemp[i][0]):
+                if (l1[i] == answers2[i][0]):
                     s = s + 1
-
         conn = MySQLdb.connect(host='localhost', database='tkinterprojDB', user='root', password='SaDa2903!')
         cursor = conn.cursor()
         q = "update reg set score='%d' where uname= '%s'"
@@ -454,8 +452,7 @@ class Quiz:
         conn.commit()
         cursor.close()
         conn.close()
-
-        messagebox.showinfo("Result", "Your Score is: " + str(s) + "/10")
+        messagebox.showinfo("Score", "Well done! You scored " + str(s) + "/10")
         quizGlobalVariable.destroy()
 root=Tk()
 RegObj = Main(root)
